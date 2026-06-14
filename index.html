@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Русские мыслители — карточки</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Inter:wght@300;400;500;600&display=swap');
+
+  :root {
+    --bg: #0f0f13;
+    --surface: #1a1a24;
+    --surface2: #23232f;
+    --border: #2e2e3e;
+    --accent: #c9a96e;
+    --accent2: #7c6fcd;
+    --text: #e8e6f0;
+    --muted: #8888aa;
+    --correct: #4caf7d;
+    --wrong: #e05c5c;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    min-height: 100vh;
+  }
+
+  header {
+    border-bottom: 1px solid var(--border);
+    padding: 20px 32px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  header h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 22px;
+    color: var(--accent);
+    letter-spacing: 0.02em;
+  }
+
+  header span {
+    font-size: 13px;
+    color: var(--muted);
+    margin-left: auto;
+  }
+
+  nav {
+    display: flex;
+    gap: 0;
+    padding: 0 32px;
+    border-bottom: 1px solid var(--border);
+    overflow-x: auto;
+  }
+
+  nav button {
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    color: var(--muted);
+    padding: 14px 20px;
+    font-size: 14px;
+    font-family: 'Inter', sans-serif;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+
+  nav button.active {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+  }
+
+  nav button:hover:not(.active) {
+    color: var(--text);
+  }
+
+  .page { display: none; padding: 32px; max-width: 900px; margin: 0 auto; }
+  .page.active { display: block; }
+
+  .list-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 12px;
+  }
+
+  .list-item {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .list-item .surname {
+    font-weight: 600;
+    font-size: 18px;
+  }
+
+  .list-item .full {
+    font-size: 15px;
+    color: var(--accent);
+    margin-top: 2px;
+  }
+
+  .list-item .dates {
+    font-size: 18px;
+    color: var(--muted);
+    text-align: right;
+  }
+
+  .section-title {
+    font-family: 'Playfair Display', serif;
+    color: var(--muted);
+    margin: 28px 0 14px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    font-size: 12px;
+  }
+
+  .cards-controls {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 24px;
+  }
+
+  .cards-controls .counter {
+    font-size: 14px;
+    color: var(--muted);
+  }
+
+  .progress-bar {
+    height: 3px;
+    background: var(--border);
+    border-radius: 2px;
+    margin-bottom: 32px;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 2px;
+    transition: width 0.3s ease;
+  }
+
+  .card-area {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .flashcard {
+    width: 100%;
+    max-width: 520px;
+    height: 240px;
+    perspective: 1000px;
+    cursor: pointer;
+    margin-bottom: 24px;
+  }
+
+  .flashcard-inner {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    transform-style: preserve-3d;
+    transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .flashcard.flipped .flashcard-inner {
+    transform: rotateY(180deg);
+  }
+
+  .card-face {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    backface-visibility: hidden;
+    border-radius: 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 32px;
+    border: 1px solid var(--border);
+  }
+
+  .card-front { background: var(--surface); }
+
+  .card-back {
+    background: var(--surface2);
+    transform: rotateY(180deg);
+    border-color: var(--accent2);
+  }
+
+  .card-front .card-surname {
+    font-family: 'Playfair Display', serif;
+    font-size: 32px;
+    font-weight: 700;
+    color: var(--text);
+  }
+
+  .card-front .hint {
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 16px;
+  }
+
+  .card-back .full-name {
+    font-family: 'Playfair Display', serif;
+    font-size: 22px;
+    color: var(--accent);
+    margin-bottom: 8px;
+  }
+
+  .card-back .card-dates {
+    font-size: 28px;
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  .card-nav {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+  }
+
+  .btn {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 10px 22px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-family: 'Inter', sans-serif;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .btn:hover { background: var(--surface2); border-color: var(--accent); }
+  .btn.primary { background: var(--accent); color: #111; border-color: var(--accent); font-weight: 600; }
+  .btn.primary:hover { opacity: 0.9; }
+
+  .quiz-question {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 28px;
+    margin-bottom: 20px;
+  }
+
+  .quiz-prompt {
+    font-size: 13px;
+    color: var(--muted);
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+
+  .quiz-term {
+    font-family: 'Playfair Display', serif;
+    font-size: 26px;
+    color: var(--text);
+    margin-bottom: 20px;
+  }
+
+  .quiz-input {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 16px;
+    font-size: 16px;
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  .quiz-input:focus { border-color: var(--accent2); }
+  .quiz-input.correct { border-color: var(--correct); background: rgba(76,175,125,0.08); }
+  .quiz-input.wrong { border-color: var(--wrong); background: rgba(224,92,92,0.08); }
+
+  .quiz-feedback {
+    margin-top: 10px;
+    font-size: 13px;
+    min-height: 20px;
+  }
+
+  .quiz-feedback.correct { color: var(--correct); }
+  .quiz-feedback.wrong { color: var(--wrong); }
+
+  .quiz-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 24px;
+  }
+
+  .score-banner {
+    background: var(--surface);
+    border: 1px solid var(--accent);
+    border-radius: 12px;
+    padding: 24px;
+    text-align: center;
+    margin-bottom: 24px;
+  }
+
+  .score-banner .score-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 48px;
+    color: var(--accent);
+  }
+
+  .score-banner p { color: var(--muted); margin-top: 4px; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Русская мысль XIX–XX вв.</h1>
+  <span id="total-count"></span>
+</header>
+
+<nav>
+  <button class="active" onclick="showPage('list', this)">📋 Список</button>
+  <button onclick="showPage('cards', this)">🃏 Карточки</button>
+  <button onclick="showPage('quiz', this)">✍️ Тест</button>
+</nav>
+
+<div id="list" class="page active"></div>
+<div id="cards" class="page"></div>
+<div id="quiz" class="page"></div>
+
+<script>
+const DATA = [
+  { surname: "Киреевский", full: "И.В. Киреевский", dates: "1806–1856", group: "Славянофилы" },
+  { surname: "Хомяков",    full: "А.С. Хомяков",    dates: "1804–1860", group: "Славянофилы" },
+  { surname: "Аксаков",    full: "К.С. Аксаков",    dates: "1817–1860", group: "Славянофилы" },
+  { surname: "Самарин",    full: "Ю.Ф. Самарин",    dates: "1819–1876", group: "Славянофилы" },
+  { surname: "Лавров",       full: "П.Л. Лавров",            dates: "1823–1900", group: "Народники и социологи" },
+  { surname: "Михайловский", full: "Н.К. Михайловский",      dates: "1842–1904", group: "Народники и социологи" },
+  { surname: "Кареев",       full: "Н.И. Кареев",            dates: "1850–1931", group: "Народники и социологи" },
+  { surname: "де Роберти",   full: "Е.В. де Роберти",        dates: "1843–1915", group: "Народники и социологи" },
+  { surname: "Стронин",      full: "А.И. Стронин",           dates: "1826–1889", group: "Народники и социологи" },
+  { surname: "Лилиенфельд",  full: "П.Ф. Лилиенфельд",      dates: "1829–1903", group: "Народники и социологи" },
+  { surname: "Новосельский", full: "С.А. Новосельский",      dates: "1872–1953", group: "Народники и социологи" },
+  { surname: "Чичерин",      full: "Б.Н. Чичерин",           dates: "1828–1904", group: "Консерваторы и государственники" },
+  { surname: "Победоносцев", full: "К.П. Победоносцев",      dates: "1827–1907", group: "Консерваторы и государственники" },
+  { surname: "Тихомиров",    full: "Л.А. Тихомиров",         dates: "1852–1923", group: "Консерваторы и государственники" },
+  { surname: "Ильин",        full: "И.А. Ильин",             dates: "1883–1954", group: "Консерваторы и государственники" },
+  { surname: "Струве",            full: "П.Б. Струве",            dates: "1870–1944", group: "Марксисты и экономисты" },
+  { surname: "Туган-Барановский", full: "М.И. Туган-Барановский", dates: "1865–1919", group: "Марксисты и экономисты" },
+  { surname: "Плеханов",          full: "Г.В. Плеханов",          dates: "1856–1918", group: "Марксисты и экономисты" },
+  { surname: "Ленин",             full: "В.И. Ленин",             dates: "1870–1924", group: "Марксисты и экономисты" },
+  { surname: "Ковалевский",  full: "М.М. Ковалевский",       dates: "1851–1916", group: "Либералы" },
+  { surname: "Сорокин",      full: "П.А. Сорокин",           dates: "1889–1968", group: "Либералы" },
+  { surname: "Соловьев",     full: "В.С. Соловьев",          dates: "1853–1900", group: "Религиозная философия" },
+  { surname: "Булгаков",     full: "С.Н. Булгаков",          dates: "1871–1944", group: "Религиозная философия" },
+  { surname: "Бердяев",      full: "Н.А. Бердяев",           dates: "1874–1948", group: "Религиозная философия" },
+  { surname: "Трубецкой",    full: "Е.Н. Трубецкой",         dates: "1863–1920", group: "Религиозная философия" },
+  { surname: "Франк",        full: "С.Л. Франк",             dates: "1877–1950", group: "Религиозная философия" },
+  { surname: "Яницкий",      full: "О.Н. Яницкий",           dates: "1933–2020", group: "Религиозная философия" },
+  { surname: "La pathologie sociale", full: "La pathologie sociale", dates: "1894", group: "Труды" },
+];
+
+const GROUPS = [...new Set(DATA.map(d => d.group))];
+document.getElementById('total-count').textContent = `${DATA.length} записей`;
+
+function renderList() {
+  const el = document.getElementById('list');
+  let html = '';
+  for (const g of GROUPS) {
+    const items = DATA.filter(d => d.group === g);
+    html += `<div class="section-title">${g}</div><div class="list-grid">`;
+    for (const item of items) {
+      html += `<div class="list-item"><div><div class="surname">${item.surname}</div><div class="full">${item.full}</div></div><div class="dates">${item.dates}</div></div>`;
+    }
+    html += '</div>';
+  }
+  el.innerHTML = html;
+}
+
+let cardIndex = 0;
+let cardData = [...DATA];
+let flipped = false;
+
+function renderCards() {
+  const el = document.getElementById('cards');
+  const item = cardData[cardIndex];
+  const pct = ((cardIndex) / cardData.length * 100).toFixed(1);
+  el.innerHTML = `
+    <div class="cards-controls">
+      <span class="counter">${cardIndex + 1} / ${cardData.length}</span>
+      <button class="btn" onclick="shuffleCards()">🔀 Перемешать</button>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
+    <div class="card-area">
+      <div class="flashcard" id="fc" onclick="flipCard()">
+        <div class="flashcard-inner">
+          <div class="card-face card-front">
+            <div class="card-surname">${item.surname}</div>
+            <div class="hint">нажми, чтобы перевернуть</div>
+          </div>
+          <div class="card-face card-back">
+            <div class="full-name">${item.full}</div>
+            <div class="card-dates">${item.dates}</div>
+          </div>
+        </div>
+      </div>
+      <div class="card-nav">
+        <button class="btn" onclick="prevCard()">← Назад</button>
+        <button class="btn primary" onclick="nextCard()">Вперёд →</button>
+      </div>
+    </div>`;
+  flipped = false;
+}
+
+function flipCard() {
+  const fc = document.getElementById('fc');
+  flipped = !flipped;
+  fc.classList.toggle('flipped', flipped);
+}
+
+function nextCard() {
+  cardIndex = cardIndex < cardData.length - 1 ? cardIndex + 1 : 0;
+  renderCards();
+}
+
+function prevCard() {
+  if (cardIndex > 0) { cardIndex--; renderCards(); }
+}
+
+function shuffleCards() {
+  cardData = [...DATA].sort(() => Math.random() - 0.5);
+  cardIndex = 0;
+  renderCards();
+}
+
+let quizData = [], quizIndex = 0, quizAnswered = false, correctCount = 0, quizMode = 0;
+
+function renderQuiz() {
+  const el = document.getElementById('quiz');
+  if (quizIndex >= quizData.length && quizData.length > 0) {
+    el.innerHTML = `<div class="score-banner"><div class="score-num">${correctCount}/${quizData.length}</div><p>правильных ответов</p></div><div class="quiz-actions"><button class="btn primary" onclick="startQuiz(0)">🔄 Повторить (даты)</button><button class="btn" onclick="startQuiz(1)">✍️ Полные имена</button></div>`;
+    return;
+  }
+  if (quizData.length === 0) {
+    el.innerHTML = `<p style="color:var(--muted);margin-bottom:20px">Выбери режим теста:</p><div class="quiz-actions"><button class="btn primary" onclick="startQuiz(0)">📅 Даты по фамилии</button><button class="btn" onclick="startQuiz(1)">🖊️ Инициалы по фамилии</button></div>`;
+    return;
+  }
+  const item = quizData[quizIndex];
+  const pct = (quizIndex / quizData.length * 100).toFixed(1);
+  const prompt = quizMode === 0 ? 'Введи годы жизни (например: 1823–1900)' : 'Введи полные инициалы и фамилию';
+  const answer = quizMode === 0 ? item.dates : item.full;
+  el.innerHTML = `
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+      <span style="font-size:13px;color:var(--muted)">${quizIndex + 1} / ${quizData.length} · ✅ ${correctCount}</span>
+      <button class="btn" onclick="startQuiz(${quizMode})">↺ Сначала</button>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
+    <div class="quiz-question">
+      <div class="quiz-prompt">${prompt}</div>
+      <div class="quiz-term">${item.surname}</div>
+      <input class="quiz-input" id="qa" type="text" placeholder="Ответ..." autocomplete="off"
+        onkeydown="if(event.key==='Enter') checkAnswer('${answer.replace(/'/g,"\\'")}')">
+      <div class="quiz-feedback" id="qf"></div>
+    </div>
+    <div class="quiz-actions">
+      <button class="btn primary" onclick="checkAnswer('${answer.replace(/'/g,"\\'")}')">Проверить</button>
+      <button class="btn" onclick="skipQuestion()">Пропустить</button>
+    </div>`;
+  setTimeout(() => document.getElementById('qa')?.focus(), 50);
+}
+
+function startQuiz(mode) {
+  quizMode = mode;
+  quizData = [...DATA].sort(() => Math.random() - 0.5);
+  quizIndex = 0; correctCount = 0; quizAnswered = false;
+  renderQuiz();
+}
+
+function normalize(s) {
+  return s.trim().toLowerCase().replace(/–|-/g, '-').replace(/\s+/g, ' ');
+}
+
+function checkAnswer(correct) {
+  if (quizAnswered) { nextQuestion(); return; }
+  const inp = document.getElementById('qa');
+  const fb = document.getElementById('qf');
+  if (!inp) return;
+  const isCorrect = normalize(inp.value) === normalize(correct);
+  inp.classList.add(isCorrect ? 'correct' : 'wrong');
+  fb.className = 'quiz-feedback ' + (isCorrect ? 'correct' : 'wrong');
+  fb.textContent = isCorrect ? '✅ Верно!' : `❌ Правильно: ${correct}`;
+  if (isCorrect) correctCount++;
+  quizAnswered = true;
+  document.querySelector('.quiz-actions .btn.primary').textContent = 'Далее →';
+}
+
+function skipQuestion() {
+  if (!quizAnswered) {
+    const correct = quizData[quizIndex][quizMode === 0 ? 'dates' : 'full'];
+    const fb = document.getElementById('qf');
+    const inp = document.getElementById('qa');
+    if (fb) { fb.className = 'quiz-feedback wrong'; fb.textContent = `Ответ: ${correct}`; }
+    if (inp) inp.classList.add('wrong');
+    quizAnswered = true;
+    document.querySelector('.quiz-actions .btn.primary').textContent = 'Далее →';
+  } else { nextQuestion(); }
+}
+
+function nextQuestion() { quizIndex++; quizAnswered = false; renderQuiz(); }
+
+function showPage(id, btn) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  btn.classList.add('active');
+  if (id === 'cards') renderCards();
+  if (id === 'quiz' && quizData.length === 0) renderQuiz();
+}
+
+renderList();
+</script>
+</body>
+</html>
